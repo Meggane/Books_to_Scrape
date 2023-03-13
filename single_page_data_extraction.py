@@ -28,3 +28,17 @@ title = soup.find("h1").string
 product_description = soup.find("div", id="product_description").find_next("p").string
 category = soup.find("li", class_="active").find_previous("a").string
 image_url = soup.find("img")["src"]
+
+
+def extract_number():
+    availability_section = soup.find("th", string="Availability").find_next("td").string
+    list_of_numbers_to_extract = []
+    for number_in_availability_section in availability_section:
+        if number_in_availability_section.isnumeric():
+            number_in_availability_section = str(number_in_availability_section)
+            list_of_numbers_to_extract.append(number_in_availability_section)
+    return list_of_numbers_to_extract
+
+
+# convert list to string
+number_available = "".join(extract_number())
