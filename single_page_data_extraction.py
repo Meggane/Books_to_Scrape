@@ -31,7 +31,7 @@ image_url = soup.find("img")["src"]
 
 
 def extract_number():
-    availability_section = soup.find("th", string="Availability").find_next("td").string
+    availability_section = table_tag_data("Availability")
     list_of_numbers_to_extract = []
     for number_in_availability_section in availability_section:
         if number_in_availability_section.isnumeric():
@@ -42,3 +42,22 @@ def extract_number():
 
 # convert list to string
 number_available = "".join(extract_number())
+
+
+def review_rating_class(class_name):
+    review_rating_class_name = soup.find("div", class_="product_main").find("p", class_=class_name)
+    return review_rating_class_name
+
+
+if review_rating_class("Five"):
+    review_rating = "5"
+elif review_rating_class("Four"):
+    review_rating = "4"
+elif review_rating_class("Three"):
+    review_rating = "3"
+elif review_rating_class("Two"):
+    review_rating = "2"
+elif review_rating_class("One"):
+    review_rating = "1"
+else:
+    review_rating = "0"
