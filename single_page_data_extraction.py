@@ -1,3 +1,4 @@
+import csv
 import requests
 from bs4 import BeautifulSoup
 
@@ -61,3 +62,14 @@ elif review_rating_class("One"):
     review_rating = "1"
 else:
     review_rating = "0"
+
+
+header = ["product_page_url", "universal_product_code", "title", "price_including_tax", "price_excluding_tax",
+          "number_available", "product_description", "category", "review_rating", "image_url"]
+line = [product_page_url, universal_product_code, title, price_including_tax, price_excluding_tax, number_available,
+        product_description, category, review_rating, image_url]
+
+with open("single_page_data_extraction.csv", "w") as csv_file:
+    writer = csv.writer(csv_file, delimiter=",")
+    writer.writerow(header)
+    writer.writerow(line)
