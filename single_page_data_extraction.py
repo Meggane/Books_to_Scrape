@@ -17,6 +17,8 @@ page = requests.get(product_page_url)
 soup = BeautifulSoup(page.content, "html.parser")
 
 
+# recovery of "td" tags for universal_product_code, price_including_tax, price_excluding_tax, availability_section which
+# all depend on the same table
 def table_tag_data(string_th_tag):
     string_td_tag = soup.find("th", string=string_th_tag).find_next("td").string
     return string_td_tag
@@ -31,6 +33,8 @@ category = soup.find("li", class_="active").find_previous("a").string
 image_url = soup.find("img")["src"]
 
 
+# extraction of the number of available books
+# transform the digits of the string into int to extract them then reconvert them to transform the list into string
 def extract_number():
     availability_section = table_tag_data("Availability")
     list_of_numbers_to_extract = []
@@ -45,6 +49,7 @@ def extract_number():
 number_available = "".join(extract_number())
 
 
+# retrieving the name of the class that determines the review rating of the books
 def review_rating_class(class_name):
     review_rating_class_name = soup.find("div", class_="product_main").find("p", class_=class_name)
     return review_rating_class_name
