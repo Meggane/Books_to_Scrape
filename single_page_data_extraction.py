@@ -1,6 +1,6 @@
-import csv
 import requests
 from bs4 import BeautifulSoup
+import csv
 
 home_page_url = "http://books.toscrape.com/"
 page = requests.get(home_page_url)
@@ -8,10 +8,8 @@ soup = BeautifulSoup(page.content, "html.parser")
 
 # get the link of the first book
 product_page_url_link = soup.find("div", class_="image_container").a["href"]
-
 # link of the first book
 product_page_url = home_page_url + product_page_url_link
-
 # assignment of the new URL to retrieve the data
 page = requests.get(product_page_url)
 soup = BeautifulSoup(page.content, "html.parser")
@@ -30,7 +28,7 @@ price_excluding_tax = table_tag_data("Price (excl. tax)")
 title = soup.find("h1").string
 product_description = soup.find("div", id="product_description").find_next("p").string
 category = soup.find("li", class_="active").find_previous("a").string
-image_url = soup.find("img")["src"]
+image_url = home_page_url + soup.find("img")["src"]
 
 
 # extraction of the number of available books
@@ -68,12 +66,11 @@ elif review_rating_class("One"):
 else:
     review_rating = "0"
 
-
+# creation of csv file
 header = ["product_page_url", "universal_product_code", "title", "price_including_tax", "price_excluding_tax",
           "number_available", "product_description", "category", "review_rating", "image_url"]
 line = [product_page_url, universal_product_code, title, price_including_tax, price_excluding_tax, number_available,
         product_description, category, review_rating, image_url]
-
 with open("single_page_data_extraction.csv", "w") as csv_file:
     writer = csv.writer(csv_file, delimiter=",")
     writer.writerow(header)

@@ -1,21 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 
-url_array = []
-all_categories_links_array = []
-category_url_array = []
-category_names_array = []
-universal_product_code_array = []
-title_array = []
-price_including_tax_array = []
-price_excluding_tax_array = []
-product_descriptions_array = []
-categories_array = []
-image_url_array = []
-product_page_url_array = []
-number_available_array = []
-review_rating_array = []
-
 
 # URL definition so as not to create shadows name
 def url_link(url):
@@ -41,6 +26,9 @@ def next_page(url):
     return next_page_link
 
 
+url_array = []
+
+
 # definition of the new URL if there are several pages
 def page_change(url):
     url_array.append(url)
@@ -52,15 +40,20 @@ def page_change(url):
     return url_array
 
 
+all_categories_links_array = []
+
+
 # recovery of links for each category
 def links_tag_of_each_category(url):
     all_categories_tag = soup_link(url).find("ul", class_="nav-list").find_next("a").find_next_siblings("ul")
     for all_categories in all_categories_tag:
         # noinspection PyUnresolvedReferences
-        test = all_categories.find_all("a")
-        for category_link in test:
+        for category_link in all_categories.find_all("a"):
             all_categories_links_array.append(category_link["href"])
     return all_categories_links_array
+
+
+category_url_array = []
 
 
 # creation of links for each category
@@ -69,6 +62,9 @@ def links_of_each_category(url):
         category_url = url + link_category
         category_url_array.append(category_url)
     return category_url_array
+
+
+category_names_array = []
 
 
 # recovery of the title of each category
@@ -89,6 +85,18 @@ def table_tag_data(url, string_th_tag, data_to_extract):
     return data_to_extract
 
 
+product_page_url_array = []
+universal_product_code_array = []
+title_array = []
+price_including_tax_array = []
+price_excluding_tax_array = []
+product_descriptions_array = []
+categories_array = []
+image_url_array = []
+number_available_array = []
+review_rating_array = []
+
+
 # recovery of data from each book
 def data_recovery(url):
     for url in page_change(url):
@@ -96,28 +104,23 @@ def data_recovery(url):
         for page_url in product_page_url_tag:
             product_page_url = url_link(url + "/../" + page_url.a["href"])
             product_page_url_array.append(product_page_url)
-
             universal_product_code_array.append(table_tag_data(product_page_url, "UPC", "universal_product_code"))
             price_including_tax_array.append(table_tag_data(product_page_url, "Price (incl. tax)",
                                                             "price_including_tax"))
             price_excluding_tax_array.append(table_tag_data(product_page_url, "Price (excl. tax)",
                                                             "price_excluding_tax"))
-
             title_tag = soup_link(product_page_url).find_all("h1")
             for title in title_tag:
                 title_array.append(title.string)
-
             product_description_tag = soup_link(product_page_url).find_all("div", id="product_description")
             for product_description in product_description_tag:
                 product_descriptions_array.append(product_description.find_next("p").string)
-
             category_tag = soup_link(product_page_url).find_all("li", class_="active")
             for category in category_tag:
                 categories_array.append(category.find_previous("a").string)
-
-            image_url_tag = soup_link(product_page_url).find_all("img")
-            for image_url in image_url_tag:
-                image_url_array.append(image_url["src"])
+            image_url_previous_tag = soup_link(product_page_url).find_all("div", class_="item active")
+            for image_url in image_url_previous_tag:
+                image_url_array.append(product_page_url + "/../" + image_url.img["src"])
 
             # extraction of the number of available books
             # transform the digits of the string into int to extract them then reconvert them to transform the list into
@@ -130,7 +133,6 @@ def data_recovery(url):
                         number_in_availability_section = str(number_in_availability_section)
                         list_of_numbers_to_extract.append(number_in_availability_section)
                 return list_of_numbers_to_extract
-
             # convert list to string
             number_available = "".join(extract_number())
             number_available_array.append(number_available)
@@ -140,7 +142,6 @@ def data_recovery(url):
                 review_rating_class_name_tag = soup_link(product_page_url).find("div", class_="product_main")\
                     .find("p", class_=class_name)
                 return review_rating_class_name_tag
-
             if review_rating_class("Five"):
                 review_rating = "5"
             elif review_rating_class("Four"):
@@ -153,9 +154,7 @@ def data_recovery(url):
                 review_rating = "1"
             else:
                 review_rating = "0"
-
             review_rating_array.append(review_rating)
-
     return product_page_url_array, universal_product_code_array, title_array, price_including_tax_array, \
         price_excluding_tax_array, number_available_array, product_descriptions_array, categories_array, \
         review_rating_array, image_url_array
