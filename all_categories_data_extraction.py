@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+import csv
 
 
 # fetch data for each new URL
@@ -39,18 +40,6 @@ def links_of_each_category(url):
     return category_url_list
 
 
-category_names_list = []
-
-
-# recovery of the title of each category
-def category_names(url):
-    for category_name in links_of_each_category(url):
-        category_titles = soup_link(category_name).find_all("h1")
-        for one_category_title in category_titles:
-            category_names_list.append(one_category_title.string)
-    return category_names_list
-
-
 # url analysis to extract scheme, netloc and path then cut the path to have a clean url
 def parsed_url_path(url, splitter, string_to_put, iterable_1, iterable_2):
     parsed_url = urlparse(url)
@@ -77,6 +66,28 @@ def all_category_pages_to_extract(url):
     return all_links_from_all_category_pages_list
 
 
+# creation of csv files according to the category of each book
+def csv_files_creation(category_name):
+    header = ["product_page_url", "universal_product_code", "title", "price_including_tax", "price_excluding_tax",
+              "number_available", "product_description", "category", "review_rating", "image_url"]
+    with open("csv_files/" + category_name + ".csv", "w") as csv_file:
+        writer = csv.writer(csv_file, delimiter=",")
+        writer.writerow(header)
+        for product_page_url_for_each_book, \
+                universal_product_code_for_each_book, title_for_each_book, price_including_tax_for_each_book, \
+                price_excluding_tax_for_each_book, number_available_for_each_book, product_description_for_each_book, \
+                category_for_each_book, review_rating_for_each_book, image_url_for_each_book in \
+                zip(product_page_url_list, universal_product_code_list, title_list, price_including_tax_list,
+                    price_excluding_tax_list, number_available_list, product_descriptions_list, categories_list,
+                    review_rating_list, image_url_list):
+            if category_for_each_book == category_name:
+                lines = [product_page_url_for_each_book, universal_product_code_for_each_book, title_for_each_book,
+                         price_including_tax_for_each_book, price_excluding_tax_for_each_book,
+                         number_available_for_each_book, product_description_for_each_book, category_for_each_book,
+                         review_rating_for_each_book, image_url_for_each_book]
+                writer.writerow(lines)
+
+
 # recovery of "td" tags for universal_product_code, price_including_tax, price_excluding_tax, availability_section which
 # all depend on the same table
 def table_tag_data(url, string_th_tag, data_to_extract):
@@ -101,6 +112,7 @@ review_rating_list = []
 # recovery of data from each book
 def data_recovery(url):
     for url_category in all_category_pages_to_extract(url):
+        category_name = soup_link(url_category).find("h1").string
         product_page_url_tag = soup_link(url_category).find_all("div", class_="image_container")
         for page_url in product_page_url_tag:
             product_page_url_link = page_url.a["href"]
@@ -118,9 +130,9 @@ def data_recovery(url):
             title_tag = soup_link(product_page_url).find_all("h1")
             for title in title_tag:
                 title_list.append(title.string)
-            product_description_tag = soup_link(product_page_url).find_all("div", id="product_description")
-            for product_description in product_description_tag:
-                product_descriptions_list.append(product_description.find_next("p").string)
+            product_description_tag = soup_link(product_page_url).find_all("div", class_="sub-header")
+            product_description = product_description_tag[0].find_next("p").string
+            product_descriptions_list.append(product_description)
             category_tag = soup_link(product_page_url).find_all("li", class_="active")
             for category in category_tag:
                 categories_list.append(category.find_previous("a").string)
@@ -164,6 +176,10 @@ def data_recovery(url):
             else:
                 review_rating = "0"
             review_rating_list.append(review_rating)
+            csv_files_creation(category_name)
     return product_page_url_list, universal_product_code_list, title_list, price_including_tax_list, \
         price_excluding_tax_list, number_available_list, product_descriptions_list, categories_list, \
         review_rating_list, image_url_list
+
+
+data_recovery("https://books.toscrape.com/")

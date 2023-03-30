@@ -2,3 +2,4 @@ env/
 .idea/
 single_page_data_extraction.csv
 one_category_data_extraction.csv
+csv_files/
