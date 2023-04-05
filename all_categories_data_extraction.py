@@ -47,11 +47,13 @@ all_links_from_all_category_pages_list = []
 def all_category_pages_to_extract(url):
     for url in links_of_each_category(url):
         all_links_from_all_category_pages_list.append(url)
+        print(url)
         while next_button(url):
             parsed_category, path_string_category = parsed_url_path(url, "/", "/", "1", "-1")
             url = parsed_category.scheme + "://" + parsed_category.netloc + "/" + path_string_category + "/" \
                 + next_button(url).a["href"]
             all_links_from_all_category_pages_list.append(url)
+            print(url)
             if next_button(url) is None:
                 break
     return all_links_from_all_category_pages_list
@@ -61,23 +63,27 @@ def all_category_pages_to_extract(url):
 def csv_files_creation(category_name):
     if not os.path.isdir("csv_files/"):
         os.mkdir("csv_files")
-    header = ["product_page_url", "universal_product_code", "title", "price_including_tax", "price_excluding_tax",
-              "number_available", "product_description", "category", "review_rating", "image_url"]
+    header = [
+        "product_page_url", "universal_product_code", "title", "price_including_tax", "price_excluding_tax",
+        "number_available", "product_description", "category", "review_rating", "image_url"
+        ]
     with open("csv_files/" + category_name + ".csv", "w") as csv_file:
         writer = csv.writer(csv_file, delimiter=",")
         writer.writerow(header)
-        for product_page_url_for_each_book, \
-                universal_product_code_for_each_book, title_for_each_book, price_including_tax_for_each_book, \
-                price_excluding_tax_for_each_book, number_available_for_each_book, product_description_for_each_book, \
-                category_for_each_book, review_rating_for_each_book, image_url_for_each_book in \
-                zip(product_page_url_list, universal_product_code_list, title_list, price_including_tax_list,
-                    price_excluding_tax_list, number_available_list, product_descriptions_list, categories_list,
-                    review_rating_list, image_url_list):
+        for product_page_url_for_each_book, universal_product_code_for_each_book, title_for_each_book, \
+                price_including_tax_for_each_book, price_excluding_tax_for_each_book, number_available_for_each_book, \
+                product_description_for_each_book, category_for_each_book, review_rating_for_each_book, \
+                image_url_for_each_book \
+                in zip(product_page_url_list, universal_product_code_list, title_list, price_including_tax_list,
+                       price_excluding_tax_list, number_available_list, product_descriptions_list, categories_list,
+                       review_rating_list, image_url_list):
             if category_for_each_book == category_name:
-                lines = [product_page_url_for_each_book, universal_product_code_for_each_book, title_for_each_book,
-                         price_including_tax_for_each_book, price_excluding_tax_for_each_book,
-                         number_available_for_each_book, product_description_for_each_book, category_for_each_book,
-                         review_rating_for_each_book, image_url_for_each_book]
+                lines = [
+                    product_page_url_for_each_book, universal_product_code_for_each_book, title_for_each_book,
+                    price_including_tax_for_each_book, price_excluding_tax_for_each_book,
+                    number_available_for_each_book, product_description_for_each_book, category_for_each_book,
+                    review_rating_for_each_book, image_url_for_each_book
+                ]
                 writer.writerow(lines)
 
 
@@ -86,7 +92,7 @@ def download_images(url_image, category_image, title_image, universal_product_co
     image_data = requests.get(url_image).content
     if not os.path.isdir("images/" + category_image):
         os.makedirs("images/" + category_image)
-    if os.path.isfile("Images/" + category_image + "/" + title_image + ".jpg"):
+    if os.path.isfile("images/" + category_image + "/" + title_image + ".jpg"):
         title_image = title_image + "_" + universal_product_code
     with open("images/" + str(category_image) + "/" + str(title_image) + ".jpg", "wb") as download_image:
         download_image.write(image_data)
@@ -151,8 +157,8 @@ def data_recovery(url):
         for page_url in product_page_url_tag:
             product_page_url_link = page_url.a["href"]
             parsed_url_category, path_url_category = parsed_url_path(url_category, "/", "", "1", "2")
-            new_url_category = parsed_url_category.scheme + "://" + parsed_url_category.netloc + \
-                                                            "/" + path_url_category + "/"
+            new_url_category = parsed_url_category.scheme + "://" + parsed_url_category.netloc \
+                                                                  + "/" + path_url_category + "/"
             parsed_product_page_url, path_product_page_url = parsed_url_path(product_page_url_link, "../", "", "3", "4")
             product_page_url = new_url_category + path_product_page_url
             product_page_url_list.append(product_page_url)
@@ -172,6 +178,8 @@ def data_recovery(url):
             product_description = soup.find("div", class_="sub-header").find_next("p").string
             product_descriptions_list.append(product_description)
             category = soup.find("li", class_="active").find_previous("a").string
+            if len(categories_list) == 0 or category != categories_list[-1]:
+                print("Category : " + category)
             categories_list.append(category)
             review_rating = review_rating_class(soup)
             review_rating_list.append(review_rating)
