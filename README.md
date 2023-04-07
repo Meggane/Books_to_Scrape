@@ -14,7 +14,7 @@ Through this project, we will extract, transform and load data into CSV files. W
 
 ---
 
-## Install and execute the code :
+## Install and execute the code (on Linux) :
 - clone the repository on your computer
 `git clone https://github.com/Meggane/Books_to_Scrape.git`
 - move to the cloned folder
